@@ -156,3 +156,10 @@ cython_debug/
 
 # VS Code settings
 .vscode/
+
+# Mac OS X Finder
+.DS_Store
+
+# Models and runs
+models/
+runs/

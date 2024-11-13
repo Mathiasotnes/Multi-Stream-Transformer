@@ -23,7 +23,11 @@ dataset:
   batch_size: 8
 
 training:
-  tokens: 300000
+  tokens: 26214400
   learning_rate: 0.01
-  eval_interval: 100
-  eval_iters: 100
+  eval_interval_tokens: 16384
+  eval_tokens: 1024
+  model_name: 'transformer'
+  checkpoint_interval_tokens: 50000
+  checkpoint_dir: './mst/models'
+  log_dir: './mst/runs'

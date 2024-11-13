@@ -10,15 +10,12 @@
 
 from . import script
 import time
-
-# Now that sys.path is adjusted, you can import from mst
 from mst import Transformer, get_dataloader, train_model
 
 def main() -> None:
-    # Get configuration
-    config = script.load_config('transformer.yaml')
     
     # Extract configurations
+    config = script.load_config('transformer.yaml')
     model_config = config['model']
     dataset_config = config['dataset']
     training_config = config['training']

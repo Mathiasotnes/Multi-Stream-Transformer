@@ -8,7 +8,7 @@
 ## year:     2024                                                           ##
 ##############################################################################
 
-from .models import Transformer
+from .architecture import Transformer
 from .data import get_dataloader
 from .training import train_model
 
