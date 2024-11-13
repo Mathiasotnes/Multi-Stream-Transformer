@@ -96,9 +96,11 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
     # Print header information
     print(f"Run ID: {run_id}")
     print(f"Total tokens to train: {tokens_to_train}\n")
+    print(f"Model: {model_name}")
+    print(f"Using device: {device}\n")
     # Print table header
     print(f"{'Tokens Trained':<15} {'FLOPs':<12} {'Tokens/Sec':<12} {'FLOPs/Sec':<12} {'Loss':<10} {'Perplexity':<12} {'ETA':<10}")
-    print('-' * 80)
+    print('-' * 85)
 
     while tokens_trained < tokens_to_train:
         batch_start_time = time.time()

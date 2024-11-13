@@ -10,17 +10,17 @@
 ##############################################################################
 
 model:
-  d_model: 64
-  num_heads: 4
-  num_layers: 6
+  d_model: 512
+  num_heads: 8
+  num_layers: 8
   d_ff: 512
   dropout_rate: 0.1
 
 dataset:
   name: openwebtext
   tokenizer_name: gpt2
-  max_seq_length: 64
-  batch_size: 8
+  max_seq_length: 512
+  batch_size: 512
 
 training:
   tokens: 26214400
