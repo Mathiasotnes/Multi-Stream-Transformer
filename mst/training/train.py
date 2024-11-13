@@ -29,18 +29,26 @@ def train_model( model: Any, dataloader: DataLoader, training_config: dict ) -> 
     perplexities    = []
     
     while tokens_trained < tokens_to_train:
-        xb, yb = next(train_loader)
-        xb, yb = xb.to(device), yb.to(device)
+        # xb, yb = next(train_loader)
+        batch = next(train_loader)
+        xb = batch[:, :-1].to(device)
+        yb = batch[:, 1:].to(device)
+        
         optimizer.zero_grad()
         logits, loss = model(xb, yb)
         loss.backward()
         optimizer.step()
+        
+        tokens_trained += xb.numel()
+        print(f"Tokens trained: {tokens_trained}/{tokens_to_train}", end="\r")
+        
         if i % eval_interval == 0 and i > 0:
             perplexity = compute_perplexity(model, train_loader, eval_iters)
             perplexities.append(perplexity)
-            print(f"Iteration {i}: Perplexity: {perplexity:.2f}")
+            print(f"\nIteration {i}: Perplexity: {perplexity:.2f}")
         i += 1
     
+    print("\n\r")
     return model
 
 def compute_perplexity(model, data_loader, eval_iters=100):
@@ -50,9 +58,10 @@ def compute_perplexity(model, data_loader, eval_iters=100):
     model.eval()
     losses = []
     total_loss = 0
-    for xb, yb in data_loader:
-        xb, yb = xb.to(device), yb.to(device)
-        pred, loss = model(xb, yb)
+    for batch in data_loader:
+        xb = batch[:, :-1].to(device)
+        yb = batch[:, 1:].to(device)
+        logits, loss = model(xb, yb)
         losses.append(loss.item())
         total_loss += loss.item()
         if len(losses) >= eval_iters: break

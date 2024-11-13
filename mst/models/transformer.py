@@ -119,6 +119,9 @@ class Transformer( nn.Module ):
         logits = self.lm_head(x)
         loss = None
         if targets is not None:
-            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
+            # targets: (batch_size, seq_length)
+            # logits:  (batch_size, seq_length, vocab_size)
+            loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), targets.reshape(-1))
+
         return x, loss
 
