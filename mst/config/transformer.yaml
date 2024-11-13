@@ -10,10 +10,10 @@
 ##############################################################################
 
 model:
-  d_model: 512
-  num_heads: 8
+  d_model: 64
+  num_heads: 4
   num_layers: 6
-  d_ff: 2048
+  d_ff: 512
   dropout_rate: 0.1
 
 dataset:
@@ -23,5 +23,7 @@ dataset:
   batch_size: 8
 
 training:
-  num_epochs: 10
+  tokens: 10000
   learning_rate: 0.01
+  eval_interval: 100
+  eval_iters: 100

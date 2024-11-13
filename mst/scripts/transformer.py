@@ -1,7 +1,7 @@
 ##############################################################################
-## main.py                                                                  ##
-## -------                                                                  ##
-## Main program for prototyping and testing the code.                       ##
+## transformer.py                                                           ##
+## --------------                                                           ##
+## Main program for training and evaluating benchmark transformer model     ##
 ##                                                                          ##
 ## ------------------------------------------------------------------------ ##
 ## Author:   Mathias Otnes                                                  ##
@@ -12,7 +12,7 @@ from . import script
 import time
 
 # Now that sys.path is adjusted, you can import from mst
-from mst import Transformer, get_dataloader
+from mst import Transformer, get_dataloader, train_model
 
 def main() -> None:
     # Get configuration
@@ -41,6 +41,9 @@ def main() -> None:
         dropout=model_config['dropout_rate'],
         echo_specs=True
     )
+    
+    train_model(model, dataloader, training_config)
+    
 
 if __name__ == "__main__":
     t = time.time()
