@@ -1,15 +1,15 @@
 ##############################################################################
 ## __init__.py                                                              ##
 ## ------------                                                             ##
-## Module initializer for the models package.                               ##
+## Module initializer for the data package.                                 ##
 ##                                                                          ##
 ## ------------------------------------------------------------------------ ##
 ## Author:   Mathias Otnes                                                  ##
 ## year:     2024                                                           ##
 ##############################################################################
 
-from .transformer import Transformer
+from .data_loader import get_dataloader
 
 __all__ = [
-    "Transformer"
+    "get_dataloader"
 ]

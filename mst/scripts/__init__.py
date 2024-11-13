@@ -1,15 +1,15 @@
 ##############################################################################
 ## __init__.py                                                              ##
 ## ------------                                                             ##
-## Module initializer for the models package.                               ##
+## Module initializer for the script package.                               ##
 ##                                                                          ##
 ## ------------------------------------------------------------------------ ##
 ## Author:   Mathias Otnes                                                  ##
 ## year:     2024                                                           ##
 ##############################################################################
 
-from .transformer import Transformer
+from .script import load_config
 
 __all__ = [
-    "Transformer"
+    "load_config"
 ]

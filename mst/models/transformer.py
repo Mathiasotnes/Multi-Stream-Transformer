@@ -16,9 +16,9 @@ from torch import Tensor
 from .pos_encoding import PositionalEncoding
 from .transformer_block import TransformerBlock
 
-class Decoder( nn.Module ):
+class Transformer( nn.Module ):
     """
-    Decoder model. Consists of:
+    Transformer model. Consists of:
         1. Embedding layer
         2. Positional encoding
         3. Transformer blocks (masked)
@@ -43,7 +43,7 @@ class Decoder( nn.Module ):
             dropout (float, optional):      Dropout rate. Defaults to 0.1.
             echo_spechs (bool, optional):   Whether to print the model specifications. Defaults to True.
         """
-        super(Decoder, self).__init__()
+        super(Transformer, self).__init__()
         self.vocab_size = vocab_size
         self.d_model = d_model
         self.num_heads = num_heads
@@ -67,7 +67,7 @@ class Decoder( nn.Module ):
         total_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         
         # Build the string
-        model_str = f"\n\rDecoder Model Specifications:\n"
+        model_str = f"\n\rTransformer Model Specifications:\n"
         model_str += f"{'='*40}\n"
         model_str += f"Vocabulary Size:          {self.vocab_size}\n"
         model_str += f"Embedding Dimension:      {self.d_model}\n"
@@ -101,7 +101,7 @@ class Decoder( nn.Module ):
     
     def forward( self, x: Tensor, targets: Tensor=None ) -> Tensor:
         """
-        Forward pass through the decoder.
+        Forward pass through the transformer.
 
         Args:
             x (Tensor):                     Input tensor. (batch_size, seq_length)
