@@ -10,6 +10,7 @@
 ## year:     2024                                                           ##
 ##############################################################################
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
@@ -124,4 +125,101 @@ class Transformer( nn.Module ):
             loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), targets.reshape(-1))
 
         return x, loss
+    
+    def generate(
+        self,
+        input_ids: Tensor,
+        max_length: int = 50,
+        temperature: float = 1.0,
+        top_k: int = None,
+        top_p: float = None,
+        repetition_penalty: float = 1.0,
+    ) -> Tensor:
+        """
+        Generate text given an input prompt.
 
+        Args:
+            input_ids (Tensor): Input tensor of shape (batch_size, seq_length)
+            max_length (int): Maximum length of the generated sequence
+            temperature (float): Sampling temperature
+            top_k (int): If specified, only sample from the top_k most probable tokens
+            top_p (float): If specified, only sample from the top_p cumulative probability
+            repetition_penalty (float): Penalty for repeated tokens
+
+        Returns:
+            output_ids (Tensor): Generated sequence of token ids
+        """
+        device = input_ids.device
+        output_ids = input_ids.clone()
+        past_tokens = set()
+
+        for _ in range(max_length):
+            logits, _ = self.forward(output_ids)
+            logits = logits[:, -1, :] / temperature  # (batch_size, vocab_size)
+
+            # Apply repetition penalty
+            if repetition_penalty != 1.0:
+                for token_id in past_tokens:
+                    logits[:, token_id] /= repetition_penalty
+
+            # Apply top_k and top_p filtering
+            filtered_logits = self.filter_logits(logits, top_k=top_k, top_p=top_p)
+
+            # Sample from the filtered distribution
+            probs = F.softmax(filtered_logits, dim=-1)
+            next_token = torch.multinomial(probs, num_samples=1)
+
+            # Update output_ids and past_tokens
+            output_ids = torch.cat([output_ids, next_token], dim=1)
+            past_tokens.add(next_token.squeeze().tolist())
+
+            # Break if EOS token is generated (assuming EOS token ID is known)
+            # if next_token.item() == eos_token_id:
+            #     break
+
+        return output_ids
+
+    def filter_logits(self, logits, top_k=None, top_p=None, filter_value=-float('Inf')):
+        """
+        Filter a distribution of logits using top-k and/or nucleus (top-p) filtering.
+
+        Args:
+            logits (Tensor): Logits distribution shape (batch_size, vocab_size)
+            top_k (int): Keep only top k tokens with highest probability
+            top_p (float): Keep the top tokens with cumulative probability >= top_p
+            filter_value (float): The value to replace filtered logits with
+
+        Returns:
+            logits (Tensor): Filtered logits
+        """
+        if top_k is not None and top_k > 0:
+            top_k = min(max(top_k, 1), logits.size(-1))  # Safety check
+            # Remove tokens with probability less than the kth highest
+            topk_vals, _ = torch.topk(logits, top_k)
+            min_topk_vals = topk_vals[:, -1].unsqueeze(-1)
+            indices_to_remove = logits < min_topk_vals
+            logits = logits.masked_fill(indices_to_remove, filter_value)
+
+        if top_p is not None and top_p < 1.0:
+            sorted_logits, sorted_indices = torch.sort(logits, descending=True)
+            sorted_probs = F.softmax(sorted_logits, dim=-1)
+            cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
+
+            # Remove tokens with cumulative probability above the threshold
+            sorted_indices_to_remove = cumulative_probs > top_p
+
+            # Shift the indices to the right to include at least one token
+            sorted_indices_to_remove[:, 1:] = sorted_indices_to_remove[:, :-1].clone()
+            sorted_indices_to_remove[:, 0] = 0
+
+            # Create a mask tensor in sorted order
+            mask = sorted_indices_to_remove
+
+            # Unsort the mask to the original order
+            logits_to_remove = torch.zeros_like(logits, dtype=torch.bool)
+            logits_to_remove.scatter_(dim=-1, index=sorted_indices, src=mask)
+
+            # Apply the mask
+            logits = logits.masked_fill(logits_to_remove, filter_value)
+
+        return logits
