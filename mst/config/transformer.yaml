@@ -20,7 +20,7 @@ dataset:
   name: openwebtext
   tokenizer_name: gpt2
   max_seq_length: 128
-  batch_size: 64
+  batch_size: 32
 
 training:
   tokens: 26214400
