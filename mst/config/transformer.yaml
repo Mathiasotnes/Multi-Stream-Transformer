@@ -20,13 +20,13 @@ dataset:
   name: ptb
   tokenizer_name: gpt2
   max_seq_length: 128
-  batch_size: 64
+  batch_size: 32
 
 training:
   tokens: 21887860
   learning_rate: 0.002
   eval_interval_tokens: 131072
-  eval_tokens: 8192
+  eval_tokens: 4096
   model_name: 'transformer'
   checkpoint_interval_tokens: 1048576
   checkpoint_dir: './mst/models'
