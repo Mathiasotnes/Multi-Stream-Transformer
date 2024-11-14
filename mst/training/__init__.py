@@ -8,8 +8,9 @@
 ## year:     2024                                                           ##
 ##############################################################################
 
-from .train import train_model
+from .train import train_model, compute_perplexity
 
 __all__ = [
-    "train_model"
+    "train_model",
+    "compute_perplexity"
 ]

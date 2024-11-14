@@ -9,13 +9,14 @@
 ##############################################################################
 
 from .architecture import Transformer
-from .data import get_dataloaders, get_tokenizer
-from .training import train_model
+from .data import get_dataloader, get_tokenizer
+from .training import train_model, compute_perplexity
 
 __all__ = [
     "Transformer",
-    "get_dataloaders",
+    "get_dataloader",
     "get_tokenizer",
-    "train_model"
+    "train_model",
+    "compute_perplexity"
 ]
 

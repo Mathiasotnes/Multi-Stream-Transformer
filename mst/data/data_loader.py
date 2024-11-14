@@ -15,8 +15,8 @@ from torch.utils.data import DataLoader
 from typing import Any, List
 import torch.nn.utils.rnn as rnn_utils
 from transformers import AutoTokenizer
-from .open_web_text import get_owt_dataloaders
-from .penn_treebank import get_ptb_dataloaders
+from .open_web_text import get_owt_dataloader
+from .penn_treebank import get_ptb_dataloader
 
 def get_tokenizer( tokenizer_name: str ) -> Any:
     """
@@ -48,11 +48,12 @@ def collate_fn( batch: List[torch.Tensor], tokenizer: Any ) -> torch.Tensor:
     """
     return rnn_utils.pad_sequence(batch, batch_first=True, padding_value=tokenizer.pad_token_id)
 
-def get_dataloaders( 
+def get_dataloader( 
     dataset_name: str, 
     tokenizer_name: str, 
     max_seq_length: int, 
-    batch_size: int 
+    batch_size: int,
+    split: str = 'train'
 ) -> DataLoader:
     """
     Get DataLoaders for the specified dataset and tokenizer.
@@ -62,24 +63,27 @@ def get_dataloaders(
         tokenizer_name (str): Name of the tokenizer.
         max_seq_length (int): Maximum sequence length for tokenization.
         batch_size (int):     Batch size.
+        split (str):          Split of the dataset to use.
     
     Returns:
-        Tuple[DataLoader]:    DataLoader for the dataset. [train_dataloader, val_dataloader]. val_dataloader is None for some datasets.
+        DataLoader:             DataLoader for the dataset.
     """
     tokenizer = get_tokenizer(tokenizer_name)
     if dataset_name == 'openwebtext':
-        return get_owt_dataloaders(
+        return get_owt_dataloader(
             tokenizer=tokenizer, 
             max_seq_length=max_seq_length, 
             batch_size=batch_size, 
-            collate_fn=lambda batch: collate_fn(batch, tokenizer)
+            collate_fn=lambda batch: collate_fn(batch, tokenizer),
+            split=split
         )
     elif dataset_name == 'penntreebank' or dataset_name == 'ptb':
-        return get_ptb_dataloaders(
+        return get_ptb_dataloader(
             tokenizer=tokenizer, 
             max_seq_length=max_seq_length, 
             batch_size=batch_size, 
-            collate_fn=lambda batch: collate_fn(batch, tokenizer)
+            collate_fn=lambda batch: collate_fn(batch, tokenizer),
+            split=split
         )
     else:
         raise ValueError(f"Unknown dataset '{dataset_name}'.")

@@ -52,7 +52,13 @@ class OpenWebTextDataset( IterableDataset ):
             # Yield the input_ids tensor
             yield tokens['input_ids'].squeeze(0)
 
-def get_owt_dataloaders( tokenizer: Any, max_seq_length: int, batch_size: int, collate_fn: callable ) -> DataLoader:
+def get_owt_dataloader( 
+        tokenizer: Any, 
+        max_seq_length: int, 
+        batch_size: int, 
+        collate_fn: callable, 
+        split: str='train' 
+    ) -> DataLoader:
     """
     Get a DataLoader for the OpenWebText dataset.
 
@@ -60,14 +66,20 @@ def get_owt_dataloaders( tokenizer: Any, max_seq_length: int, batch_size: int, c
         tokenizer (Any):           Tokenizer to tokenize the text data.
         max_seq_length (int):      Maximum sequence length for tokenization.
         batch_size (int):          Batch size.
+        split (str, optional):     Dataset split, defaults to 'train'.
 
     Returns:
         DataLoader:                DataLoader for the dataset.
     """
-    dataset = OpenWebTextDataset(tokenizer=tokenizer, max_seq_length=max_seq_length)
+    if split == 'train':
+        dataset = OpenWebTextDataset(tokenizer=tokenizer, max_seq_length=max_seq_length)
+    else:
+        dataset = None
+        raise ValueError(f"Unknown split '{split}' for OpenWebText dataset.")
+    
     dataloader = DataLoader(
         dataset, 
         batch_size=batch_size, 
         collate_fn=collate_fn
     )
-    return dataloader, None
+    return dataloader

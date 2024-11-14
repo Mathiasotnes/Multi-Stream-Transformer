@@ -186,7 +186,7 @@ def compute_perplexity(model, data_loader, eval_tokens=100000):
             logits, loss = model(xb, yb)
             
             num_tokens = yb.numel()
-            total_loss += loss.item() * num_tokens
+            total_loss += loss.item()
             total_tokens += num_tokens
             
             if total_tokens >= eval_tokens:
