@@ -39,7 +39,7 @@ class PennTreebankTrainDataset( IterableDataset ):
             torch.Tensor: Tokenized input_ids tensor.
         """
         # Load the dataset in streaming mode
-        dataset = load_dataset('ptb_text_only', split='train', streaming=True)
+        dataset = load_dataset('ptb_text_only', split='train', streaming=True, trust_remote_code=True)
 
         for sample in dataset:
             text = sample['sentence']
