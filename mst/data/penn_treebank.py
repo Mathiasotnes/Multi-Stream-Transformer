@@ -71,8 +71,7 @@ def get_ptb_dataloader( tokenizer: Any, max_seq_length: int, batch_size: int, co
     dataloader = DataLoader(
         dataset, 
         batch_size=batch_size, 
-        collate_fn=collate_fn,
-        num_workers=4
+        collate_fn=collate_fn
     )
     return dataloader
     
