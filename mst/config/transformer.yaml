@@ -10,7 +10,7 @@
 ##############################################################################
 
 model:
-  d_model: 256
+  d_model: 512
   num_heads: 8
   num_layers: 4
   d_ff: 256
@@ -20,7 +20,7 @@ dataset:
   name: openwebtext
   tokenizer_name: gpt2
   max_seq_length: 128
-  batch_size: 256
+  batch_size: 64
 
 training:
   tokens: 26214400
