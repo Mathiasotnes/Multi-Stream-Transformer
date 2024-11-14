@@ -42,3 +42,4 @@ class PositionalEncoding( nn.Module ):
         x = x + pe
         x = self.do(x)
         return x
+     

@@ -9,12 +9,12 @@
 ##############################################################################
 
 from .architecture import Transformer
-from .data import get_dataloader, get_tokenizer
+from .data import get_dataloaders, get_tokenizer
 from .training import train_model
 
 __all__ = [
     "Transformer",
-    "get_dataloader",
+    "get_dataloaders",
     "get_tokenizer",
     "train_model"
 ]

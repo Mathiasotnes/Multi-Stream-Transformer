@@ -1,7 +1,7 @@
 ##############################################################################
-## transformer.py                                                           ##
-## --------------                                                           ##
-## Main program for training and evaluating benchmark transformer model     ##
+## transformer_training.py                                                  ##
+## -----------------------                                                  ##
+## Main program for training benchmark transformer model                    ##
 ##                                                                          ##
 ## ------------------------------------------------------------------------ ##
 ## Author:   Mathias Otnes                                                  ##
@@ -10,10 +10,12 @@
 
 from . import script
 import torch
+import os
 import time
-from mst import Transformer, get_dataloader, train_model
+from mst import Transformer, get_dataloaders, train_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
 def main() -> None:
     
@@ -24,16 +26,19 @@ def main() -> None:
     training_config = config['training']
 
     # Set up data loaders
-    dataloader = get_dataloader(
+    train_dataloader, val_dataloader = get_dataloaders(
         dataset_name=dataset_config['name'],
         tokenizer_name=dataset_config['tokenizer_name'],
         max_seq_length=dataset_config['max_seq_length'],
         batch_size=dataset_config['batch_size'],
     )
     
+    assert train_dataloader is not None, "Training dataloader not found."
+    assert len(train_dataloader.dataset.tokenizer) == len(val_dataloader.dataset.tokenizer), "Tokenizer mismatch."
+    
     # Create a transformer model
     model = Transformer(
-        vocab_size=len(dataloader.dataset.tokenizer),
+        vocab_size=len(train_dataloader.dataset.tokenizer),
         d_model=model_config['d_model'],
         num_heads=model_config['num_heads'],
         hidden_dim=model_config['d_ff'],
@@ -42,7 +47,12 @@ def main() -> None:
         echo_specs=True
     ).to(device)
     
-    train_model(model, dataloader, training_config)
+    train_model(
+        model=model,
+        training_config=training_config,
+        train_dataloader=train_dataloader,
+        val_dataloader=val_dataloader
+    )
     
 
 if __name__ == "__main__":

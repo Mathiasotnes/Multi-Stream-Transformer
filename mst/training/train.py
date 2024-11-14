@@ -52,7 +52,7 @@ def estimate_flops(model, sequence_length):
     return flops
 
 
-def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> Any:
+def train_model( model: Any, training_config: dict, train_dataloader: DataLoader, val_dataloader: DataLoader=None ) -> Any:
     
     # Extract training configurations
     lr                              = training_config["learning_rate"]
@@ -66,7 +66,7 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
     
     # Initialize training parameters
     optimizer           = optim.Adam(model.parameters(), lr=lr)
-    train_loader        = cycle(dataloader)
+    train_dataloader    = cycle(train_dataloader)
     tokens_trained      = 0
     perplexities        = []
     next_checkpoint     = checkpoint_interval_tokens
@@ -75,6 +75,9 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
     cumulative_batches  = 0
     start_time          = time.time()
     last_time           = start_time
+    
+    if val_dataloader is None:
+        val_dataloader = train_dataloader
 
     # Checkpointing
     os.makedirs(checkpoint_dir, exist_ok=True)
@@ -87,7 +90,7 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
     writer = SummaryWriter(log_dir=log_dir)
 
     # Estimate FLOPs
-    batch = next(iter(dataloader))
+    batch = next(iter(train_dataloader))
     batch_size, seq_length = batch.shape
     input_shape = seq_length
     flops_per_batch = estimate_flops(model, input_shape)
@@ -99,14 +102,14 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
     print(f"Model: {model_name}")
     print(f"Using device: {device}\n")
     # Print table header
-    print(f"{'Tokens Trained':<15} {'FLOPs':<12} {'Tokens/Sec':<12} {'FLOPs/Sec':<12} {'Loss':<10} {'Perplexity':<12} {'ETA':<10}")
+    print(f"{'Tokens Trained':<15} {'Tokens/Sec':<12} {'FLOPs/Sec':<12} {'Loss':<10} {'Perplexity':<12} {'ETA':<10}")
     print('-' * 85)
 
     while tokens_trained < tokens_to_train:
         batch_start_time = time.time()
 
         # Get next batch
-        batch = next(train_loader)
+        batch = next(train_dataloader)
         xb = batch[:, :-1].to(device)
         yb = batch[:, 1:].to(device)
 
@@ -139,7 +142,7 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
 
         # Evaluation
         if tokens_trained >= next_eval_tokens:
-            perplexity = compute_perplexity(model, dataloader, eval_tokens)
+            perplexity = compute_perplexity(model, train_dataloader, eval_tokens)
             perplexities.append(perplexity)
             writer.add_scalar('Perplexity/train', perplexity, tokens_trained)
 
@@ -151,7 +154,7 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
             eta_str = time.strftime('%H:%M:%S', time.gmtime(eta_seconds))
 
             # Print formatted row
-            print(f"{tokens_trained:<15} {float(total_flops):<12.2f} {tokens_per_second:<12.2f} {flops_per_second:<12.2e} {avg_loss:<10.4f} {perplexity:<12.2f} {eta_str:<10}")
+            print(f"{tokens_trained:<15} {tokens_per_second:<12.2f} {flops_per_second:<12.2e} {avg_loss:<10.4f} {perplexity:<12.2f} {eta_str:<10}")
 
             next_eval_tokens += eval_interval_tokens
 

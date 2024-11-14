@@ -15,7 +15,8 @@ from torch.utils.data import DataLoader
 from typing import Any, List
 import torch.nn.utils.rnn as rnn_utils
 from transformers import AutoTokenizer
-from .open_web_text import OpenWebTextDataset
+from .open_web_text import get_owt_dataloaders
+from .penn_treebank import get_ptb_dataloaders
 
 def get_tokenizer( tokenizer_name: str ) -> Any:
     """
@@ -35,23 +36,6 @@ def get_tokenizer( tokenizer_name: str ) -> Any:
         raise ValueError(f"Unknown tokenizer '{tokenizer_name}': {e}")
     return tokenizer
 
-def get_dataset( dataset_name: str, tokenizer: Any, max_seq_length: int ) -> torch.utils.data.Dataset:
-    """
-    Initialize and return a dataset based on the dataset name.
-    
-    Args:
-        dataset_name (str):     Name of the dataset.
-        tokenizer (Any):        Tokenizer to use.
-        max_seq_length (int):   Maximum sequence length.
-    
-    Returns:
-        torch.utils.data.Dataset: The dataset object.
-    """
-    if dataset_name.lower() == 'openwebtext':
-        return OpenWebTextDataset(tokenizer=tokenizer, max_seq_length=max_seq_length)
-    else:
-        raise ValueError(f"Unknown dataset '{dataset_name}'")
-
 def collate_fn( batch: List[torch.Tensor], tokenizer: Any ) -> torch.Tensor:
     """
     Collate function to pad variable length sequences.
@@ -64,14 +48,14 @@ def collate_fn( batch: List[torch.Tensor], tokenizer: Any ) -> torch.Tensor:
     """
     return rnn_utils.pad_sequence(batch, batch_first=True, padding_value=tokenizer.pad_token_id)
 
-def get_dataloader( 
+def get_dataloaders( 
     dataset_name: str, 
     tokenizer_name: str, 
     max_seq_length: int, 
     batch_size: int 
 ) -> DataLoader:
     """
-    Get a DataLoader for the specified dataset and tokenizer.
+    Get DataLoaders for the specified dataset and tokenizer.
     
     Args:
         dataset_name (str):   Name of the dataset.
@@ -80,13 +64,22 @@ def get_dataloader(
         batch_size (int):     Batch size.
     
     Returns:
-        DataLoader:           DataLoader for the dataset.
+        Tuple[DataLoader]:    DataLoader for the dataset. [train_dataloader, val_dataloader]. val_dataloader is None for some datasets.
     """
     tokenizer = get_tokenizer(tokenizer_name)
-    dataset = get_dataset(dataset_name, tokenizer, max_seq_length)
-    dataloader = DataLoader(
-        dataset,
-        batch_size=batch_size,
-        collate_fn=lambda batch: collate_fn(batch, tokenizer)
-    )
-    return dataloader
+    if dataset_name == 'openwebtext':
+        return get_owt_dataloaders(
+            tokenizer=tokenizer, 
+            max_seq_length=max_seq_length, 
+            batch_size=batch_size, 
+            collate_fn=lambda batch: collate_fn(batch, tokenizer)
+        )
+    elif dataset_name == 'penntreebank' or dataset_name == 'ptb':
+        return get_ptb_dataloaders(
+            tokenizer=tokenizer, 
+            max_seq_length=max_seq_length, 
+            batch_size=batch_size, 
+            collate_fn=lambda batch: collate_fn(batch, tokenizer)
+        )
+    else:
+        raise ValueError(f"Unknown dataset '{dataset_name}'.")

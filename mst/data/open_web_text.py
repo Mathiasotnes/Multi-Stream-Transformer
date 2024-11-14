@@ -52,7 +52,7 @@ class OpenWebTextDataset( IterableDataset ):
             # Yield the input_ids tensor
             yield tokens['input_ids'].squeeze(0)
 
-def get_dataloader( tokenizer: Any, max_seq_length: int, batch_size: int, collate_fn: callable ) -> DataLoader:
+def get_owt_dataloaders( tokenizer: Any, max_seq_length: int, batch_size: int, collate_fn: callable ) -> DataLoader:
     """
     Get a DataLoader for the OpenWebText dataset.
 
@@ -70,4 +70,4 @@ def get_dataloader( tokenizer: Any, max_seq_length: int, batch_size: int, collat
         batch_size=batch_size, 
         collate_fn=collate_fn
     )
-    return dataloader
+    return dataloader, None
