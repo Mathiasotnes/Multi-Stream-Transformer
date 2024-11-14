@@ -78,7 +78,7 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
 
     # Checkpointing
     os.makedirs(checkpoint_dir, exist_ok=True)
-    checkpoint_path = os.path.join(checkpoint_dir, f'checkpoint_{model_name}.pt')  # Set checkpoint path
+    checkpoint_path = os.path.join(checkpoint_dir, f'checkpoint_{model_name}.pt')
 
     # Logging
     run_id = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -89,7 +89,7 @@ def train_model(model: Any, dataloader: DataLoader, training_config: dict) -> An
     # Estimate FLOPs
     batch = next(iter(dataloader))
     batch_size, seq_length = batch.shape
-    input_shape = seq_length - 1  # Remove one token for target
+    input_shape = seq_length
     flops_per_batch = estimate_flops(model, input_shape)
     total_flops = 0
 

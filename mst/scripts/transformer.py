@@ -9,8 +9,11 @@
 ##############################################################################
 
 from . import script
+import torch
 import time
 from mst import Transformer, get_dataloader, train_model
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main() -> None:
     
@@ -37,7 +40,7 @@ def main() -> None:
         num_blocks=model_config['num_layers'],
         dropout=model_config['dropout_rate'],
         echo_specs=True
-    )
+    ).to(device)
     
     train_model(model, dataloader, training_config)
     
