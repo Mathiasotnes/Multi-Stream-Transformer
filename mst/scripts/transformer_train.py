@@ -12,7 +12,7 @@ from . import script
 import torch
 import os
 import time
-from mst import Transformer, get_dataloaders, train_model
+from mst import Transformer, get_dataloader, train_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -26,11 +26,19 @@ def main() -> None:
     training_config = config['training']
 
     # Set up data loaders
-    train_dataloader, val_dataloader = get_dataloaders(
+    train_dataloader = get_dataloader(
         dataset_name=dataset_config['name'],
         tokenizer_name=dataset_config['tokenizer_name'],
         max_seq_length=dataset_config['max_seq_length'],
         batch_size=dataset_config['batch_size'],
+        split='train'
+    )
+    val_dataloader = get_dataloader(
+        dataset_name=dataset_config['name'],
+        tokenizer_name=dataset_config['tokenizer_name'],
+        max_seq_length=dataset_config['max_seq_length'],
+        batch_size=dataset_config['batch_size'],
+        split='validation'
     )
     
     assert train_dataloader is not None, "Training dataloader not found."

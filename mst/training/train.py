@@ -16,6 +16,7 @@ from itertools import cycle
 from datetime import datetime
 
 import torch
+import math
 import torch.optim as optim
 import time
 import os
@@ -193,7 +194,7 @@ def compute_perplexity(model, data_loader, eval_tokens=100000):
                 break
 
     mean_loss = total_loss / total_tokens
-    perplexity = torch.exp(torch.tensor(mean_loss)).item()
+    perplexity = math.exp(mean_loss)
 
     model.train()
     return perplexity

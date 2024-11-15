@@ -122,9 +122,12 @@ class Transformer( nn.Module ):
         if targets is not None:
             # targets: (batch_size, seq_length)
             # logits:  (batch_size, seq_length, vocab_size)
-            loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), targets.reshape(-1))
+            loss = F.cross_entropy(
+                logits.reshape(-1, logits.size(-1)), targets.reshape(-1),
+                reduction='mean'
+            )
 
-        return x, loss
+        return logits, loss
     
     def generate(
         self,
