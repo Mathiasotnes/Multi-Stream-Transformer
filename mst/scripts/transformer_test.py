@@ -42,7 +42,8 @@ def main() -> None:
     ).to(device)
 
     # Load model checkpoint
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    script.print_training_details(checkpoint)
     model.load_state_dict(checkpoint['model_state_dict'])
 
     # Extract tokens trained
@@ -75,6 +76,10 @@ def main() -> None:
     print(f"{'='*40}")
     print(f"{'Test Perplexity:':<20} {Fore.CYAN} {perplexity:.2f} {Fore.WHITE}")
     print(f"{'='*40}")
+    
+    # Save test perplexity to checkpoint
+    checkpoint['test_perplexity'] = perplexity
+    torch.save(checkpoint, checkpoint_path)
     
 if __name__ == "__main__":
     t = time.time()

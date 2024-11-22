@@ -43,7 +43,8 @@ def main() -> None:
     ).to(device)
 
     # Load model checkpoint
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    script.print_training_details(checkpoint)
     model.load_state_dict(checkpoint['model_state_dict'])
 
     # Extract tokens trained
@@ -63,6 +64,9 @@ def main() -> None:
         if prompt.lower() in {"exit", "quit"}:
             print("Exiting the program.")
             break
+        
+        elif prompt == "":
+            continue
 
         # Tokenize the input prompt and generate response
         input_ids = tokenizer.encode(prompt, return_tensors="pt").to(device)

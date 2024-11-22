@@ -78,26 +78,26 @@ class Transformer( nn.Module ):
         model_str += f"Dropout Rate:             {self.dropout}\n"
         model_str += f"Total Parameters:         {total_params}\n"
         model_str += f"{'='*40}\n"
-        model_str += f"Trainable Parameters per Component:\n"
+        model_str += f"Parameter count:\n"
 
         # Components and their parameter counts
         components = [
-            ('Embedding Layer:    ', self.emb),
-            ('Positional Encoding:', self.pos_enc),
-            ('Linear Head:        ', self.lm_head),
-            ('Layer Norm:         ', self.ln_f),
+            ('Embedding Layer:     ', self.emb),
+            ('Positional Encoding: ', self.pos_enc),
+            ('Linear Head:         ', self.lm_head),
+            ('Layer Norm:          ', self.ln_f),
         ]
 
         # Add Transformer Blocks
         for i, block in enumerate(self.blocks):
-            components.append((f'Transformer Block {i+1}:', block))
+            components.append((f'Transformer Block {i+1}: ', block))
 
         # Calculate and append parameter counts for each component
         for name, module in components:
             num_params = sum(p.numel() for p in module.parameters() if p.requires_grad)
             model_str += f"  * {name} {num_params}\n"
 
-        model_str += f"{'='*40}\n"
+        model_str += f"{'='*40}"
         return model_str
     
     def forward( self, x: Tensor, targets: Tensor=None ) -> Tensor:

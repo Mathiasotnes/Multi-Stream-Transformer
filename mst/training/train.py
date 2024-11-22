@@ -53,8 +53,8 @@ def estimate_flops(model, sequence_length):
     return flops
 
 
-def train_model( model: Any, training_config: dict, train_dataloader: DataLoader, val_dataloader: DataLoader=None ) -> Any:
-    
+def train_model(model: Any, training_config: dict, train_dataloader: DataLoader, val_dataloader: DataLoader = None) -> Any:
+
     # Extract training configurations
     lr                              = training_config["learning_rate"]
     eval_interval_tokens            = training_config["eval_interval_tokens"]
@@ -64,19 +64,18 @@ def train_model( model: Any, training_config: dict, train_dataloader: DataLoader
     checkpoint_interval_tokens      = training_config["checkpoint_interval_tokens"]
     checkpoint_dir                  = training_config["checkpoint_dir"]
     log_dir                         = training_config["log_dir"]
-    
+
     # Initialize training parameters
     optimizer           = optim.Adam(model.parameters(), lr=lr)
     train_dataloader    = cycle(train_dataloader)
     tokens_trained      = 0
-    perplexities        = []
     next_checkpoint     = checkpoint_interval_tokens
     next_eval_tokens    = eval_interval_tokens
     cumulative_loss     = 0.0
-    cumulative_batches  = 0
+    total_tokens        = 0
     start_time          = time.time()
-    last_time           = start_time
-    
+    val_perplexity      = 0.0
+
     if val_dataloader is None:
         val_dataloader = train_dataloader
 
@@ -97,14 +96,13 @@ def train_model( model: Any, training_config: dict, train_dataloader: DataLoader
     flops_per_batch = estimate_flops(model, input_shape)
     total_flops = 0
 
-    # Print header information
+    # Print header
     print(f"Run ID: {run_id}")
     print(f"Total tokens to train: {tokens_to_train}\n")
     print(f"Model: {model_name}")
     print(f"Using device: {device}\n")
-    # Print table header
-    print(f"{'Tokens Trained':<15} {'Tokens/Sec':<12} {'FLOPs/Sec':<12} {'Loss':<10} {'Perplexity':<12} {'ETA':<10}")
-    print('-' * 85)
+    print(f"{'Tokens Trained':<15} {'Tokens/Sec':<12} {'FLOPs/Sec':<12} {'Avg Loss':<10} {'Train PPL':<12} {'Val PPL':<12} {'ETA':<10}")
+    print('-' * 100)
 
     while tokens_trained < tokens_to_train:
         batch_start_time = time.time()
@@ -123,14 +121,15 @@ def train_model( model: Any, training_config: dict, train_dataloader: DataLoader
         batch_time = time.time() - batch_start_time
 
         # Update counters
-        batch_tokens = xb.numel()
+        batch_tokens = yb.numel()
         tokens_trained += batch_tokens
-        cumulative_loss += loss.item()
-        cumulative_batches += 1
+        cumulative_loss += loss.item() * batch_tokens
+        total_tokens += batch_tokens
         total_flops += flops_per_batch
 
         # Calculate metrics
-        avg_loss = cumulative_loss / cumulative_batches
+        avg_loss = cumulative_loss / total_tokens
+        train_perplexity = math.exp(avg_loss)
         current_time = time.time()
         total_elapsed_time = current_time - start_time
         tokens_per_second = tokens_trained / total_elapsed_time
@@ -138,24 +137,23 @@ def train_model( model: Any, training_config: dict, train_dataloader: DataLoader
 
         # Log to TensorBoard
         writer.add_scalar('Loss/train', avg_loss, tokens_trained)
+        writer.add_scalar('Perplexity/train', train_perplexity, tokens_trained)
         writer.add_scalar('Tokens per second', tokens_per_second, tokens_trained)
         writer.add_scalar('FLOPs per second', flops_per_second, tokens_trained)
 
         # Evaluation
         if tokens_trained >= next_eval_tokens:
-            perplexity = compute_perplexity(model, train_dataloader, eval_tokens)
-            perplexities.append(perplexity)
-            writer.add_scalar('Perplexity/train', perplexity, tokens_trained)
+            val_perplexity = compute_perplexity(model, val_dataloader, eval_tokens)
+            writer.add_scalar('Perplexity/validation', val_perplexity, tokens_trained)
 
             # Estimate time remaining
             tokens_remaining = tokens_to_train - tokens_trained
-            eta_seconds = 0
-            if tokens_remaining > 0:
-                eta_seconds = tokens_remaining / tokens_per_second if tokens_per_second > 0 else 0
+            eta_seconds = tokens_remaining / tokens_per_second if tokens_per_second > 0 else 0
             eta_str = time.strftime('%H:%M:%S', time.gmtime(eta_seconds))
 
             # Print formatted row
-            print(f"{tokens_trained:<15} {tokens_per_second:<12.2f} {flops_per_second:<12.2e} {avg_loss:<10.4f} {perplexity:<12.2f} {eta_str:<10}")
+            print(f"{tokens_trained:<15} {tokens_per_second:<12.2f} {flops_per_second:<12.2e} "
+                  f"{avg_loss:<10.4f} {train_perplexity:<12.2f} {val_perplexity:<12.2f} {eta_str:<10}")
 
             next_eval_tokens += eval_interval_tokens
 
@@ -166,12 +164,16 @@ def train_model( model: Any, training_config: dict, train_dataloader: DataLoader
                 'optimizer_state_dict': optimizer.state_dict(),
                 'tokens_trained': tokens_trained,
                 'training_config': training_config,
+                'total_flops': total_flops,
+                'train_perplexity': train_perplexity,
+                'val_perplexity': val_perplexity
             }, checkpoint_path)
             next_checkpoint += checkpoint_interval_tokens
 
     writer.close()
     print("\nTraining complete.\n")
     return model
+
 
 def compute_perplexity(model, data_loader, eval_tokens=100000):
     """ 
