@@ -27,7 +27,7 @@ def main() -> None:
     model_name = training_config['model_name']
 
     # Set checkpoint path
-    checkpoint_path = os.path.join(checkpoint_dir, f"checkpoint_{model_name}.pt")
+    checkpoint_path = os.path.join(checkpoint_dir, f"{model_name}.pt")
 
     # Initialize transformer model
     tokenizer = get_tokenizer(dataset_config['tokenizer_name'])
