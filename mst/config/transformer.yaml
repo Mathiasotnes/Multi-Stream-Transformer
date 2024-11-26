@@ -13,14 +13,14 @@ model:
   d_model: 128
   num_heads: 8
   num_layers: 8
-  d_ff: 256
+  d_ff: 512
   dropout_rate: 0.1
 
 dataset:
   name: ptb
   tokenizer_name: gpt2
   max_seq_length: 128
-  batch_size: 32
+  batch_size: 16
 
 training:
   tokens: 21887860
