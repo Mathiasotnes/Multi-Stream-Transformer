@@ -25,14 +25,14 @@ class Transformer( nn.Module ):
         3. Transformer blocks (masked)
     """
     def __init__( 
-            self, 
-            vocab_size: int, 
-            d_model: int, 
-            num_heads: int, 
-            hidden_dim: int, 
-            num_blocks: int, 
-            dropout: float=0.1,
-            echo_specs: bool=True
+        self, 
+        vocab_size: int, 
+        d_model: int, 
+        num_heads: int, 
+        hidden_dim: int, 
+        num_blocks: int, 
+        dropout: float=0.1,
+        echo_specs: bool=True
         ) -> None:
         """
         Args:
@@ -109,7 +109,7 @@ class Transformer( nn.Module ):
             targets (Tensor, optional):     Target tensor. Defaults to None.
 
         Returns:
-            x (Tensor):                     Decoded representation. (batch_size, seq_length, d_model)
+            logits (Tensor):                Logits tensor. (batch_size, seq_length, vocab_size)
             loss (Tensor):                  Loss value. Defaults to None.
             
         """

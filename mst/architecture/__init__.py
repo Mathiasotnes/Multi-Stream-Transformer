@@ -9,7 +9,9 @@
 ##############################################################################
 
 from .transformer import Transformer
+from .multi_stream_transformer import MultiStreamTransformer
 
 __all__ = [
     "Transformer"
+    "MultiStreamTransformer"
 ]

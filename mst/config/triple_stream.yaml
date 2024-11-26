@@ -1,0 +1,37 @@
+##############################################################################
+## triple_stream.yaml                                                       ##
+## ------------------                                                       ##
+## Configuration file for model, dataset, and training parameters for       ##
+## multi-stream transformer model containing three parallell residual       ##
+## streams.                                                                 ##
+##                                                                          ##
+## ------------------------------------------------------------------------ ##
+## Author:   Mathias Otnes                                                  ##
+## year:     2024                                                           ##
+##############################################################################
+
+model:
+  d_model: 128
+  num_heads: 8
+  num_blocks: 2
+  num_streams: 3
+  blocks_per_stream: 2
+  d_ff: 512
+  dropout_rate: 0.1
+  fusion_method: 'average'
+
+dataset:
+  name: ptb
+  tokenizer_name: gpt2
+  max_seq_length: 128
+  batch_size: 16
+
+training:
+  tokens: 21887860
+  learning_rate: 0.0001
+  eval_interval_tokens: 131072
+  eval_tokens: 4096
+  model_name: 'triple_stream'
+  checkpoint_interval_tokens: 1048576
+  checkpoint_dir: './mst/models'
+  log_dir: './mst/runs'
