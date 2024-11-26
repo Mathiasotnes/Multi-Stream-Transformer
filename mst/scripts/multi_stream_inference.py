@@ -12,7 +12,7 @@
 from colorama import Fore
 from . import script
 import torch
-from mst import Transformer, get_tokenizer
+from mst import MultiStreamTransformer, get_tokenizer
 import time
 import os
 
@@ -33,7 +33,7 @@ def main() -> None:
 
     # Initialize transformer model
     tokenizer = get_tokenizer(dataset_config['tokenizer_name'])
-    model = Transformer(
+    model = MultiStreamTransformer(
         vocab_size=len(tokenizer),
         d_model=model_config['d_model'],
         num_heads=model_config['num_heads'],
