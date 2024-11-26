@@ -18,6 +18,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
 def main() -> None:
+
+    torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
+    torch.cuda.empty_cache()
     
     # Extract configurations
     config = script.load_config('transformer.yaml')
