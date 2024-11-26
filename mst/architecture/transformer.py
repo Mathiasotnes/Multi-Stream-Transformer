@@ -142,11 +142,11 @@ class Transformer( nn.Module ):
         Generate text given an input prompt.
 
         Args:
-            input_ids (Tensor): Input tensor of shape (batch_size, seq_length)
-            max_length (int): Maximum length of the generated sequence
-            temperature (float): Sampling temperature
-            top_k (int): If specified, only sample from the top_k most probable tokens
-            top_p (float): If specified, only sample from the top_p cumulative probability
+            input_ids (Tensor):         Input tensor of shape (batch_size, seq_length)
+            max_length (int):           Maximum length of the generated sequence
+            temperature (float):        Sampling temperature
+            top_k (int):                If specified, only sample from the top_k most probable tokens
+            top_p (float):              If specified, only sample from the top_p cumulative probability
             repetition_penalty (float): Penalty for repeated tokens
 
         Returns:
@@ -187,10 +187,10 @@ class Transformer( nn.Module ):
         Filter a distribution of logits using top-k and/or nucleus (top-p) filtering.
 
         Args:
-            logits (Tensor): Logits distribution shape (batch_size, vocab_size)
-            top_k (int): Keep only top k tokens with highest probability
-            top_p (float): Keep the top tokens with cumulative probability >= top_p
-            filter_value (float): The value to replace filtered logits with
+            logits (Tensor):        Logits distribution shape (batch_size, vocab_size)
+            top_k (int):            Keep only top k tokens with highest probability
+            top_p (float):          Keep the top tokens with cumulative probability >= top_p
+            filter_value (float):   The value to replace filtered logits with
 
         Returns:
             logits (Tensor): Filtered logits
