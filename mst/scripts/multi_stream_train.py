@@ -25,7 +25,7 @@ def main() -> None:
     torch.cuda.empty_cache()
     
     # Extract configurations
-    config = script.load_config('dual_stream.yaml') # Use dual_stream.yaml, triple_stream.yaml or multi_stream.yaml
+    config = script.load_config('triple_stream.yaml') # Use dual_stream.yaml, triple_stream.yaml or multi_stream.yaml
     model_config = config['model']
     dataset_config = config['dataset']
     training_config = config['training']
